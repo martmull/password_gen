@@ -1,7 +1,6 @@
 # Password generator
-Attempt to create a hard to break easy to remember password generator
-
-Currently we use ~3000 french words to create passwords
+Attempt to create a hard to break easy to remember password generator.
+Currently we use ~3000 french words to create passwords.
 
 See precisions [here](https://diceware.dmuth.org/)
 
