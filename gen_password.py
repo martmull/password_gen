@@ -1,13 +1,19 @@
 import math
 import random
 import re
+from typing import List
 
 import click
 from loguru import logger
 
-FILE_PATH = "/Users/plurielle/.french_common_words.txt"
+
 MAX_SIZE_WORD = 9
 MIN_SIZE_WORD = 2
+
+
+class FilePaths:
+    FRENCH = "dictionaries/french_common_words.txt"
+    ENGLISH = "dictionaries/english_common_words.txt"
 
 
 def is_valid(word: str) -> bool:
@@ -20,15 +26,38 @@ def is_valid(word: str) -> bool:
     return True
 
 
-@click.command()
-@click.option('--length', '-l', default=6, help='Number of words used to create password.')
-@click.option('--salt', default=False, help='Add some entropy', is_flag=True)
-def generate_password(length: int, salt: bool = False) -> [str, float]:
-    with open(FILE_PATH) as f:
+def get_valid_words(english_only: bool) -> List[str]:
+    with open(FilePaths.ENGLISH) as f:
         words = f.readlines()
-    valid_words = [word.rstrip("\n") for word in words if is_valid(word)]
-    logger.info(f"Creating password with {len(valid_words)} words")
+    if not english_only:
+        with open(FilePaths.FRENCH) as f:
+            words += f.readlines()
+    return [word.rstrip("\n") for word in words if is_valid(word)]
 
+
+def salt_password(password: str) -> [str, int]:
+    position = random.randrange(len(password))
+    digit = random.randrange(10)
+    added_complexity = 10 * len(password)
+    return f"{password[:position]}{digit}{password[position:]}", added_complexity
+
+
+def get_entropy(length: int, dict_cardinal: int, added_complexity: int) -> int:
+    return int(math.log(dict_cardinal**length * added_complexity) / math.log(2))
+
+def format_password_to_common_rules(password: str) -> str:
+    return f"{password.capitalize()}0."
+
+@click.command()
+@click.option(
+    "--length", "-l", default=6, help="Number of words used to create password."
+)
+@click.option("--salt", default=False, help="Add some entropy", is_flag=True)
+@click.option(
+    "--english_only", default=False, help="Use only english dictionary", is_flag=True
+)
+def generate_password(length: int, salt: bool, english_only: bool) -> [str, float]:
+    valid_words = get_valid_words(english_only=english_only)
     new_password = ""
     password_length = 0
     while password_length < length:
@@ -36,20 +65,18 @@ def generate_password(length: int, salt: bool = False) -> [str, float]:
         if is_valid(new_word):
             new_password = f"{new_word} {new_password}"
             password_length += 1
-    new_password = new_password.capitalize()
-    salt_entropy = 1
+    added_complexity = 1
     if salt:
-        position = random.randrange(len(new_password))
-        digit = random.randrange(10)
-        new_password = f"{new_password[:position]}{digit}{new_password[position:]}"
-        salt_entropy = 10 * len(new_password)
-    new_password = f"{new_password.capitalize()}0."
-    entropy = int(math.log(
-        len(valid_words) ** length * salt_entropy
-    ) / math.log(2))
-    logger.info(f"{new_password} (entropy: {entropy})")
+        new_password, added_complexity = salt_password(password=new_password)
+    entropy = get_entropy(
+        length=length, dict_cardinal=len(valid_words), added_complexity=added_complexity
+    )
+    new_password = format_password_to_common_rules(password=new_password)
+    logger.info(
+        f"{new_password} (Entropy: {entropy} - Dictionary: {len(valid_words)} words)"
+    )
     return new_password, entropy
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_password()
