@@ -27,7 +27,7 @@ def generate_password(length: int, salt: bool = False) -> [str, float]:
     with open(FILE_PATH) as f:
         words = f.readlines()
     valid_words = [word.rstrip("\n") for word in words if is_valid(word)]
-    # logger.info(f"Creating password with {len(valid_words)} words")
+    logger.info(f"Creating password with {len(valid_words)} words")
 
     new_password = ""
     password_length = 0
