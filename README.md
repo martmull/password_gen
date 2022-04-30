@@ -1,7 +1,11 @@
 # Password generator
 Attempt to create a hard to break easy to remember password generator
+
 Currently we use ~3000 french words to create passwords
+
 See precisions [here](https://diceware.dmuth.org/)
+
+![image](https://user-images.githubusercontent.com/29927851/166083159-792a4c3b-2646-468d-9833-d028febc3ddc.png)
 
 # Installation
 - `git clone https://github.com/martmull/password_gen.git`
