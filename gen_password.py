@@ -6,7 +6,6 @@ from typing import List
 import click
 from loguru import logger
 
-
 MAX_SIZE_WORD = 9
 MIN_SIZE_WORD = 2
 
@@ -43,10 +42,12 @@ def salt_password(password: str) -> [str, int]:
 
 
 def get_entropy(length: int, dict_cardinal: int, added_complexity: int) -> int:
-    return int(math.log(dict_cardinal**length * added_complexity) / math.log(2))
+    return int(math.log(dict_cardinal ** length * added_complexity) / math.log(2))
+
 
 def format_password_to_common_rules(password: str) -> str:
     return f"{password.capitalize()}0."
+
 
 @click.command()
 @click.option(
